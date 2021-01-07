@@ -36,6 +36,10 @@ routes.get('/clientsold', async (request, response)=>{
         });
     return response.json({listOld});
 });
+/*
+routes.get('/sqlpure', async (request, response) => {
+    const sqlpure = await knex('clients').raw('SELECT * FROM name = "Hugo Lélio" ');
+});*/
 
 routes.post('/clients', async (request, response)=>{
 
