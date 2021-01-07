@@ -49,6 +49,9 @@ routes.post('/clients', async (request, response)=>{
     }
 
     const insertClient = await knex('clients').insert(client).then(data => {
+         knex('clients').select('id', 'name', 'phone').then(data => {
+            console.log(data);
+        }) // uma query select dentro da query de insert ou seja após inserir ela exibe a mesma no console conforme campos selecionados.
         console.log(data);
     }).catch(err =>{
         console.log(err);
