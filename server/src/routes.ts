@@ -38,7 +38,11 @@ routes.post('/clients', async (request, response)=>{
         age
     }
 
-    const insertClient = await knex('clients').insert(client);
+    const insertClient = await knex('clients').insert(client).then(data => {
+        console.log(data);
+    }).catch(err =>{
+        console.log(err);
+    });
     
     return response.json(console.log(insertClient));
 })
