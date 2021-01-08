@@ -1,4 +1,4 @@
-import express from 'express'; 
+import express, {request, response} from 'express'; 
 import knex from './database/connections';
 
 const routes = express.Router();
@@ -26,6 +26,21 @@ routes.get('/clients', async (request, response)=>{
 });
 
 
+routes.get('/clients/:id', async (request, response)=>{
+
+    const id = Number( request.params.id );
+    const client = await knex('clients').where({id: id}).first();
+    return response.json(client);
+});
+
+
+routes.put('/clients/:id', async (request, response)=>{
+
+    const id = Number( request.params.id );
+    const clientId = await knex('clients').where({id: id}).update({age: 25, email: "albermft@gmail.com"});
+    return response.json(clientId);
+});
+
 routes.get('/clientsold', async (request, response)=>{
     const listOld = await knex('clients').select('*')
         //.where({name: "Hugo Lélio"}) // seleciona exatamente o que é pedido, se remover nesse caso passa a mostrar as varias opções do condicional a baixo,NÂO MISTURAR DOIS WHERE esse codigo é para testar as facilidades do knex
@@ -36,6 +51,7 @@ routes.get('/clientsold', async (request, response)=>{
         });
     return response.json({listOld});
 });
+
 /*
 routes.get('/sqlpure', async (request, response) => {
     const sqlpure = await knex('clients').raw('SELECT * FROM name = "Hugo Lélio" ');
@@ -74,5 +90,9 @@ routes.post('/clients', async (request, response)=>{
     
     return response.json(console.log(insertClient));
 })
+
+
+
+
 
 export default routes;
