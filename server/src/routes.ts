@@ -41,6 +41,13 @@ routes.put('/clients/:id', async (request, response)=>{
     return response.json(clientId);
 });
 
+routes.delete('/clients/:id', async (request, response)=>{
+
+    const id = Number( request.params.id );
+    const clientIdDel = await knex('clients').where({id: id}).delete();
+    return response.json(clientIdDel);
+});
+
 routes.get('/clientsold', async (request, response)=>{
     const listOld = await knex('clients').select('*')
         //.where({name: "Hugo Lélio"}) // seleciona exatamente o que é pedido, se remover nesse caso passa a mostrar as varias opções do condicional a baixo,NÂO MISTURAR DOIS WHERE esse codigo é para testar as facilidades do knex
