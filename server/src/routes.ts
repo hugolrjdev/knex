@@ -57,7 +57,15 @@ routes.get('/clientsold', async (request, response)=>{
             console.log(err);
         });
     return response.json({listOld});
+}); 
+
+
+routes.get('/clients-order-by', async (request, response)=>{
+    const clientsList = await knex('clients').select('*').orderBy('name', 'asc'); // "desc" ordena do maior para o menor "asc" ordena do menor para o maior // Não trata CaseSentive 
+    return response.json({clientsList});
+
 });
+
 
 /*
 routes.get('/sqlpure', async (request, response) => {
