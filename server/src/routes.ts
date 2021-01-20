@@ -17,14 +17,52 @@ import './server';
 
 routes.get('/clients', async (request, response)=>{
 
-    const clientslist = await knex('clients').select('id', 'name', 'phone', 'age').then(data => {
+    const clientslist = await knex('clients').select('id', 'name', 'phone', 'age')/*.then(data => {
         console.log(data);
     }).catch(err => {
         console.log(err);
-    }); // vai exbir o codigo somente dentro do nodejs console.log usar somente em caso de testes por enquento
-    return response.json(clientslist);
+    });*/ // vai exbir o codigo somente dentro do nodejs console.log usar somente em caso de testes por enquento
+    
+    const dependentList = await knex('clients')
+    .innerJoin('clients_dependents', 'clients.id', '=', 'clients_dependents.id').then(data=>{
+        console.log(data)
+    }).catch(err => {
+        console.log(err);
+    });
+
+
+
+    return response.json({dependentList});
 });
 
+routes.get('/clientsjoin', async (request, response)=>{
+    
+    const clients = await knex('clients').select()
+    
+    const clientsMap = clients.map(client =>{
+        console.log(client)
+    })
+    
+    return response.json({clientsMap});
+
+});
+
+
+routes.get('/clientsjoin/:id', async (request, response)=>{
+    const id = Number(request.params.id); 
+
+    const client = await knex('clients').where('id', id).first();
+
+    if(!client){
+        return response.status(400).json('Client Not Found!');
+    }
+
+    const dependents = await knex('dependents')
+    .join('clients_dependents', 'dependents.id', '=', 'clients_dependents.dependent_id') // confirme dentro de clients_dependents se dependents.id é igual a clients_depenendents.depenendent_id
+    .where('clients_dependents.client_id', id); //mostre o client_id que seja igual ao id passado no params
+
+    return response.json({client, dependents});
+})
 
 routes.get('/clients/:id', async (request, response)=>{
 
@@ -42,7 +80,6 @@ routes.put('/clients/:id', async (request, response)=>{
 });
 
 routes.delete('/clients/:id', async (request, response)=>{
-
     const id = Number( request.params.id );
     const clientIdDel = await knex('clients').where({id: id}).delete();
     return response.json(clientIdDel);
@@ -63,15 +100,71 @@ routes.get('/clientsold', async (request, response)=>{
 routes.get('/clients-order-by', async (request, response)=>{
     const clientsList = await knex('clients').select('*').orderBy('name', 'asc'); // "desc" ordena do maior para o menor "asc" ordena do menor para o maior // Não trata CaseSentive 
     return response.json({clientsList});
-
 });
 
+
+routes.post('/insert-dependent', async (request, response)=>{
+    
+    const {
+        name,
+        record_date,
+        phone,
+        gender,
+        email,
+        birth,
+        age,
+        dependent,
+        name_dependent,
+        age_dependent,
+    } = request.body;
+    
+    const depentent = [{
+        name_dependent,
+        age_dependent,
+    }]
+
+    const client = {
+        name,
+        record_date,
+        phone,
+        gender,
+        email,
+        birth,
+        age,
+    }
+    
+    
+
+    const insertClient = await knex('clients').insert(client);
+    const idClient = insertClient[0];
+    const insertdependent = await knex('dependents').insert(depentent);
+    const idDependent = insertdependent;
+
+    await knex('clients_dependents').insert(
+       [{ client_id:idClient,
+        dependent_id:idDependent}]
+    );
+
+    return response.json({
+        insertClient,
+        insertdependent
+    });
+});
+
+
+routes.post('/dependents/:id', (request, response)=>{
+    const id = Number(request.params.id);
+
+    return response.json({sucsess: true});
+})
 
 /*
 routes.get('/sqlpure', async (request, response) => {
     const sqlpure = await knex('clients').raw('SELECT * FROM name = "Hugo Lélio" ');
 });*/
 
+
+/*
 routes.post('/clients', async (request, response)=>{
 
     const {
@@ -83,6 +176,7 @@ routes.post('/clients', async (request, response)=>{
         birth,
         age
     } = request.body;
+    
 
     const client = {
         name,
@@ -92,6 +186,7 @@ routes.post('/clients', async (request, response)=>{
         email,
         birth,
         age
+        
     }
 
     const insertClient = await knex('clients').insert(client).then(data => {
@@ -104,7 +199,9 @@ routes.post('/clients', async (request, response)=>{
     });
     
     return response.json(console.log(insertClient));
-})
+})*/
+
+
 
 
 
