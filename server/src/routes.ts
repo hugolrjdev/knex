@@ -22,7 +22,7 @@ routes.get('/clients', async (request, response)=>{
     }).catch(err => {
         console.log(err);
     });*/ // vai exbir o codigo somente dentro do nodejs console.log usar somente em caso de testes por enquento
-    
+
     const dependentList = await knex('clients')
     .innerJoin('clients_dependents', 'clients.id', '=', 'clients_dependents.id').then(data=>{
         console.log(data)
@@ -36,13 +36,13 @@ routes.get('/clients', async (request, response)=>{
 });
 
 routes.get('/clientsjoin', async (request, response)=>{
-    
+
     const clients = await knex('clients').select()
-    
+
     const clientsMap = clients.map(client =>{
         console.log(client)
     })
-    
+
     return response.json({clientsMap});
 
 });
@@ -94,7 +94,7 @@ routes.get('/clientsold', async (request, response)=>{
             console.log(err);
         });
     return response.json({listOld});
-}); 
+});
 
 
 routes.get('/clients-order-by', async (request, response)=>{
@@ -103,8 +103,18 @@ routes.get('/clients-order-by', async (request, response)=>{
 });
 
 
+routes.get('/clients_dependents/:id', async ( request, response )=>{
+
+    const id = Number(request.params.id);
+
+    const clientInsert = await knex('clients').where('id', id);
+
+    return response.json({clientInsert});
+
+});
+
 routes.post('/insert-dependent', async (request, response)=>{
-    
+
     const {
         name,
         record_date,
@@ -117,7 +127,7 @@ routes.post('/insert-dependent', async (request, response)=>{
         name_dependent,
         age_dependent,
     } = request.body;
-    
+
     const depentent = [{
         name_dependent,
         age_dependent,
@@ -132,13 +142,12 @@ routes.post('/insert-dependent', async (request, response)=>{
         birth,
         age,
     }
-    
-    
+
 
     const insertClient = await knex('clients').insert(client);
     const idClient = insertClient[0];
     const insertdependent = await knex('dependents').insert(depentent);
-    const idDependent = insertdependent;
+    const idDependent = insertdependent[0];
 
     await knex('clients_dependents').insert(
        [{ client_id:idClient,
@@ -152,10 +161,30 @@ routes.post('/insert-dependent', async (request, response)=>{
 });
 
 
-routes.post('/dependents/:id', (request, response)=>{
+routes.post('/clients_dependents/:id', async (request, response)=>{
     const id = Number(request.params.id);
 
-    return response.json({sucsess: true});
+    const {
+        name_dependent,
+        age_dependent,
+        client_id,
+        dependent_id
+    } = request.body;
+
+    const dependent = {
+        name_dependent,
+        age_dependent
+    }
+
+    const dependentExtra = await knex('dependents').insert(dependent);
+    const idDependent = dependentExtra;
+
+    await knex('clients_dependents').insert(
+        [{ client_id: id,
+            dependent_id:idDependent}]
+    );
+
+    return response.json({idDependent});
 })
 
 /*
